@@ -24,3 +24,32 @@ function createRole (title, salary, department_id) {
     
     return pool.query(sql, params);
 }
+
+function viewDepartments () {
+  const sql = `SELECT * FROM departments`;
+
+    return pool.query(sql);
+}
+
+function viewEmployees () {
+  const sql = `SELECT * FROM employees`;
+
+    return pool.query(sql);
+}
+
+function viewRoles () {
+  const sql = `SELECT * FROM roles`;
+
+    return pool.query(sql);
+}
+
+function updateEmployeeRole (employee_id, role_id) {
+  const sql = `UPDATE employees
+    SET role_id = $2
+    WHERE id = $1`;
+  const params = [employee_id, role_id];
+
+  return pool.query(sql, params);
+}
+
+export { createDepartment, createEmployee, createRole, viewDepartments, viewEmployees, viewRoles, updateEmployeeRole };

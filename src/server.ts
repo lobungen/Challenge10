@@ -1,91 +1,78 @@
 import inquirer from 'inquirer';
 import { QueryResult } from 'pg';
 import { pool, connectToDb } from './connection.js';
+import { createDepartment, createEmployee, createRole, viewDepartments, viewEmployees, viewRoles, updateEmployeeRole } from './database.js';
 
 await connectToDb();
 
-// Read all movies
-app.get('/api/movies', (_req, res) => {
-  const sql = `SELECT id, movie_name AS title FROM movies`;
-
-  pool.query(sql, (err: Error, result: QueryResult) => {
-    if (err) {
-      res.status(500).json({ error: err.message });
-      return;
-    }
-    const { rows } = result;
-    res.json({
-      message: 'success',
-      data: rows,
+function startCli(): void {
+  inquirer
+    .prompt([
+      {
+        type: 'list',
+        name: 'action',
+        message: 'Welcome to employee tracker! What would you like to do?',
+        choices: [
+          'View departments',
+          'View roles',
+          'View employees',
+          'Add department',
+          'Add role',
+          'Add employee',
+          'Update employee role',
+          'Exit',
+        ],
+      },
+    ])
+    .then((res) => {
+      //switch statement for the different options on inquirer.
+      switch (res.action) {
+        case 'View departments':
+          displayDepartments();
+          break;
+        case 'View roles':
+          displayRoles();
+          break;
+        case 'View employees':
+          displayEmployees();
+          break;
+        case 'Add department':
+          addDepartment();
+          break;
+        case 'Add role':
+          addRole();
+          break;
+        case 'Add employee':
+          addEmployee();
+          break;
+        case 'Update employee role':
+          updateEmployee();
+          break;
+        default:
+          pool.end();
+          process.exit(0);
+      }
     });
+}
+
+function displayDepartments(): void {
+  viewDepartments().then((res: QueryResult) => {
+    console.table(res.rows);
+    startCli();
   });
-});
+}
 
-// Delete a movie
-app.delete('/api/movie/:id', (req, res) => {
-  const sql = `DELETE FROM movies WHERE id = $1`;
-  const params = [req.params.id];
-
-  pool.query(sql, params, (err: Error, result: QueryResult) => {
-    if (err) {
-      res.status(400).json({ error: err.message });
-    } else if (!result.rowCount) {
-      res.json({
-        message: 'Movie not found',
-      });
-    } else {
-      res.json({
-        message: 'deleted',
-        changes: result.rowCount,
-        id: req.params.id,
-      });
-    }
+function displayRoles(): void {
+  viewRoles().then((res: QueryResult) => {
+    console.table(res.rows);
+    startCli();
   });
-});
+}
 
-// Read list of all reviews and associated movie name using LEFT JOIN
-app.get('/api/movie-reviews', (_req, res) => {
-  const sql = `SELECT movies.movie_name AS movie, reviews.review FROM reviews LEFT JOIN movies ON reviews.movie_id = movies.id ORDER BY movies.movie_name;`;
-  pool.query(sql, (err: Error, result: QueryResult) => {
-    if (err) {
-      res.status(500).json({ error: err.message });
-      return;
-    }
-    const { rows } = result;
-    res.json({
-      message: 'success',
-      data: rows,
-    });
+function displayEmployees(): void {
+  viewEmployees().then((res: QueryResult) => {
+    console.table(res.rows);
+    startCli();
   });
-});
+}
 
-// BONUS: Update review
-app.put('/api/review/:id', (req, res) => {
-  const sql = `UPDATE reviews SET review = $1 WHERE id = $2`;
-  const params = [req.body.review, req.params.id];
-
-  pool.query(sql, params, (err: Error, result: QueryResult) => {
-    if (err) {
-      res.status(400).json({ error: err.message });
-    } else if (!result.rowCount) {
-      res.json({
-        message: 'Review not found',
-      });
-    } else {
-      res.json({
-        message: 'success',
-        data: req.body,
-        changes: result.rowCount,
-      });
-    }
-  });
-});
-
-// Default response for any other request (Not Found)
-app.use((_req, res) => {
-  res.status(404).end();
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
