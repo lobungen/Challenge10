@@ -1,9 +1,9 @@
 import inquirer from 'inquirer';
 import { QueryResult } from 'pg';
-import { pool, connectToDb } from './connection.js';
-import { createDepartment, createEmployee, createRole, viewDepartments, viewEmployees, viewRoles, updateEmployeeRole } from './database.js';
+//import { pool, connectToDb } from './connection.js';
+import { exit, createDepartment, createEmployee, createRole, viewDepartments, viewEmployees, viewRoles, updateEmployeeRole } from './database.js';
 
-await connectToDb();
+
 
 function startCli(): void {
   inquirer
@@ -49,8 +49,7 @@ function startCli(): void {
           updateEmployee();
           break;
         default:
-          pool.end();
-          process.exit(0);
+          exit();
       }
     });
 }
@@ -76,3 +75,101 @@ function displayEmployees(): void {
   });
 }
 
+function addDepartment(): void {
+  inquirer
+    .prompt([
+      {
+        type: 'input',
+        name: 'department_name',
+        message: 'Enter the name of the department:',
+      },
+    ])
+    .then((res) => {
+      createDepartment(res.department_name).then(() => {
+        console.log('Department added!');
+        startCli();
+      });
+    });
+}
+
+function addRole(): void {
+  inquirer
+    .prompt([
+      {
+        type: 'input',
+        name: 'title',
+        message: 'Enter the title of the role:',
+      },
+      {
+        type: 'number',
+        name: 'salary',
+        message: 'Enter the salary of the role:',
+      },
+      {
+        type: 'number',
+        name: 'department_id',
+        message: 'Enter the department id of the role:',
+      },
+    ])
+    .then((res) => {
+      createRole(res.title, res.salary, res.department_id).then(() => {
+        console.log('Role added!');
+        startCli();
+      });
+    });
+}
+function addEmployee(): void {
+  inquirer
+    .prompt([
+      {
+        type: 'input',
+        name: 'first_name',
+        message: 'Enter the first name of the employee:',
+      },
+      {
+        type: 'input',
+        name: 'last_name',
+        message: 'Enter the last name of the employee:',
+      },
+      {
+        type: 'input',
+        name: 'role_id',
+        message: 'Enter role id:'
+      },
+      {
+        type: 'input',
+        name: 'manager_id',
+        message: 'Enter manager id:'
+      }
+    ])
+    .then((res) => {
+      createEmployee(res.first_name, res.last_name, res.role_id, res.manager_id).then(() => {
+        console.log('Employee added!');
+        startCli();
+      });
+    }
+    );
+}
+
+function updateEmployee(): void {
+  inquirer
+    .prompt([
+      {
+        type: 'input',
+        name: 'employee_id',
+        message: 'Enter the employee id:',
+      },
+      {
+        type: 'input',
+        name: 'role_id',
+        message: 'Enter the role id:',
+      },
+    ])
+    .then((res) => {
+      updateEmployeeRole(res.employee_id, res.role_id).then(() => {
+        console.log('Employee role updated!');
+        startCli();
+      });
+    });
+}
+startCli();

@@ -1,5 +1,6 @@
 import { QueryResult } from 'pg';
 import { pool, connectToDb } from './connection.js';
+await connectToDb();
 
 function createDepartment (department_name) {
   const sql = `INSERT INTO departments (department_name)
@@ -52,4 +53,10 @@ function updateEmployeeRole (employee_id, role_id) {
   return pool.query(sql, params);
 }
 
-export { createDepartment, createEmployee, createRole, viewDepartments, viewEmployees, viewRoles, updateEmployeeRole };
+function exit() {
+  pool.end();
+  process.exit(0);
+}
+
+export { exit, createDepartment, createEmployee, createRole, viewDepartments, viewEmployees, viewRoles, updateEmployeeRole };
+
